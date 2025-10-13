@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ⚙️ CONFIGURACIÓN GENERAL
 SECRET_KEY = 'django-clave-segura'
-DEBUG = True  # True / Local || False / Render
+DEBUG = False  # True / Local || False / Render
 ALLOWED_HOSTS = ['*']  # Render necesita '*'
 
 # 🧩 APLICACIONES
