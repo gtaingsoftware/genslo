@@ -1,1 +1,1 @@
-web: gunicorn genslo.wsgi:application
+gunicorn genslo.wsgi:application
