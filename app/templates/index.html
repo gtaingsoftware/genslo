@@ -1,253 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GENSLO Web - Superficies OACI</title>
+  <meta charset="UTF-8">
+  <title>Generar KML / TXT</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      background-color: #32373c;
-      color: #f1f1f1;
-      padding: 20px;
-    }
-
-    form {
-      max-width: 1200px;
-      margin: auto;
-      background-color: #3b4148;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-    }
-
-    h1, h2 {
-      text-align: center;
-      color: #a3d5f7;
-      margin-bottom: 10px;
-    }
-
-    .separator {
-      grid-column: 1 / -1;
-      font-size: 18px;
-      color: #7fb7de;
-      margin-top: 30px;
-      border-bottom: 1px solid #7fb7de;
-      padding-bottom: 5px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px 30px;
-      margin-top: 20px;
-    }
-
-    label {
-      font-size: 14px;
-      margin-bottom: 4px;
-      display: block;
-      color: #d4dbe3;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: none;
-      background-color: #4f565e;
-      color: #f1f1f1;
-      font-size: 14px;
-      transition: box-shadow 0.3s ease;
-    }
-
-    input:focus, select:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px #7fb7de;
-      background-color: #5c646d;
-    }
-
-    .full-width {
-      grid-column: 1 / -1;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 15px;
-      margin-top: 30px;
-    }
-
-    button {
-      background-color: #4a90c2;
-      color: white;
-      padding: 12px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      flex: 1;
-    }
-
-    button:hover {
-      background-color: #3a7db0;
-    }
-
-    @media (max-width: 1024px) {
-      .form-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-      .button-group {
-        flex-direction: column;
-      }
-    }
+    body { font-family: sans-serif; margin: 40px; }
+    form { display: grid; gap: 10px; max-width: 400px; }
+    label { display: flex; justify-content: space-between; }
+    input { flex: 1; margin-left: 10px; }
+    button { margin-top: 10px; padding: 8px 12px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <form id="genslo-form">
-    <h1>GENSLO beta v1.0</h1>
-    <h2>Superficies Limitadoras de Obstáculos - Según ANEXO 14 - OACI</h2>
+<h1>Generar archivos desde Django</h1>
 
-    <div class="form-grid">
-      <div class="separator">Datos del Aeródromo</div>
+<form method="post" action="/api/ejecutar/">
+    {% csrf_token %}
+    <label>Nombre AD: <input name="nombre_ad" required></label>
+    <label>Pista: <input name="pista" required></label>
+    <label>Ancho pista: <input name="ancho_pista" required></label>
+    <label>Latitud operador: <input name="lat_op_dms" required></label>
+    <label>Longitud operador: <input name="long_op_dms" required></label>
+    <label>Elevación operador: <input name="elev_op" required></label>
+    <label>Latitud extremo: <input name="lat_ext_dms" required></label>
+    <label>Longitud extremo: <input name="long_ext_dms" required></label>
+    <label>Elevación extremo: <input name="elev_ext" required></label>
+    <label>Tipo aproximación: <input name="tipo_aprox" required></label>
+    <label>Nº clave: <input name="n_clave" required></label>
+    <label>Ref SHI: <input name="ref_shi" required></label>
 
-      <div>
-        <label>Nombre de Aeródromo</label>
-        <input type="text" name="nombre_ad" placeholder="SABE, AEP, Aeroparque">
-      </div>
-      <div>
-        <label>Pista Seleccionada</label>
-        <input type="text" id="pista" name="pista" placeholder="Ej: 19">
-      </div>
-      <div>
-        <label>Ancho de Pista [m]</label>
-        <input type="text" name="ancho_pista" placeholder="Ej: 45.25">
-      </div>
+    <button type="submit" name="descargar_kml">Descargar archivo KML</button>
+    <button type="submit" name="descargar_txt">Descargar informe TXT</button>
+</form>
 
-      <div class="separator">Coordenadas de Umbral de Pista</div>
-
-      <div>
-        <label id="latitudLabel">Latitud - THR [Grados Dec. o DMS]</label>
-        <input type="text" name="lat_op_dms" placeholder="Ej: -34.906414 / 345430.23S">
-      </div>
-      <div>
-        <label id="longitudLabel">Longitud - THR [Grados Dec. o DMS]</label>
-        <input type="text" name="long_op_dms" placeholder="Ej: -57.943292 / 575630.91W">
-      </div>
-      <div>
-        <label>Elevación - THR [m]</label>
-        <input type="text" name="elev_op" placeholder="Ej: 15">
-      </div>
-
-      <div class="separator">Coordenadas del Extremo de Pista</div>
-
-      <div>
-        <label>Latitud - Ext. de Pista</label>
-        <input type="text" name="lat_ext_dms" placeholder="Ej: -34.906414">
-      </div>
-      <div>
-        <label>Longitud - Ext. de Pista</label>
-        <input type="text" name="long_ext_dms" placeholder="Ej: -57.943292">
-      </div>
-      <div>
-        <label>Elevación Extremo Pista [m]</label>
-        <input type="text" name="elev_ext" placeholder="Ej: 15">
-      </div>
-
-      <div class="separator">Parámetros Operativos</div>
-
-      <div>
-        <label>Tipo de Aproximación</label>
-        <select name="tipo_aprox">
-          <option value="Visual">Visual</option>
-          <option value="No Precision">No Precision</option>
-          <option value="Precision CAT I">Precision CAT I</option>
-          <option value="Precision CAT II o III">Precision CAT II o III</option>
-        </select>
-      </div>
-
-      <div>
-        <label>N° de Clave de Referencia de Aeródromo</label>
-        <select name="n_clave">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Elevación de Referencia SHI</label>
-        <select name="ref_shi">
-          <option value="RWY - THR">RWY - THR</option>
-          <option value="Punto Medio">Punto Medio</option>
-          <option value="RWY - Extremo">RWY - Extremo</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="button-group">
-      <button type="button" id="btn-kml">Descargar KML</button>
-      <button type="button" id="btn-txt">Descargar TXT</button>
-    </div>
-  </form>
-
-  <script>
-    // Cambia etiquetas según pista ingresada
-    document.getElementById('pista').addEventListener('input', function () {
-      const pista = this.value.trim();
-      const latitudLabel = document.getElementById('latitudLabel');
-      const longitudLabel = document.getElementById('longitudLabel');
-
-      if (pista) {
-        latitudLabel.textContent = `Latitud - THR ${pista} [Grados Dec. o DMS]`;
-        longitudLabel.textContent = `Longitud - THR ${pista} [Grados Dec. o DMS]`;
-      } else {
-        latitudLabel.textContent = 'Latitud - THR [Grados Dec. o DMS]';
-        longitudLabel.textContent = 'Longitud - THR [Grados Dec. o DMS]';
-      }
-    });
-
-    // Función genérica para enviar el formulario
-    async function enviar(tipo) {
-      const form = document.getElementById('genslo-form');
-      const formData = new FormData(form);
-      const json = Object.fromEntries(formData.entries());
-
-      try {
-        const response = await fetch(`/api/${tipo}/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(json)
-        });
-
-        if (!response.ok) {
-          alert("Error al generar el archivo. Verifica los datos o el servidor.");
-          return;
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = tipo === 'generar-kml' ? 'archivo.kml' : 'informe.txt';
-        a.click();
-        window.URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error("Error en la solicitud:", error);
-        alert("No se pudo conectar con el servidor.");
-      }
-    }
-
-    document.getElementById('btn-kml').addEventListener('click', () => enviar('generar-kml'));
-    document.getElementById('btn-txt').addEventListener('click', () => enviar('generar-txt'));
-  </script>
 </body>
 </html>
