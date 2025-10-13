@@ -1,7 +1,9 @@
-from django.urls import path
-from . import views
+from django.contrib import admin
+from django.urls import path, include
+from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('api/generar-kml/', views.generar_kml, name='generar_kml'),
-    path('api/generar-txt/', views.generar_txt, name='generar_txt'),
+    path("admin/", admin.site.urls),
+    path("", TemplateView.as_view(template_name="index.html")),  # Página principal
+    path("", include("app.urls")), 
 ]
