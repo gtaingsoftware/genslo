@@ -1,32 +1,39 @@
-# app_genslo/views.py
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-import json
+from app.genslo import main
 
 @csrf_exempt
-def generar_kml(request):
-    if request.method != 'POST':
-        return JsonResponse({"error": "Método no permitido"}, status=405)
+def ejecutar_programa(request):
+    if request.method == "POST":
+        datos = {
+            "nombre_ad": request.POST["nombre_ad"],
+            "pista": request.POST["pista"],
+            "ancho_pista": request.POST["ancho_pista"],
+            "lat_op_dms": request.POST["lat_op_dms"],
+            "long_op_dms": request.POST["long_op_dms"],
+            "elev_op": request.POST["elev_op"],
+            "lat_ext_dms": request.POST["lat_ext_dms"],
+            "long_ext_dms": request.POST["long_ext_dms"],
+            "elev_ext": request.POST["elev_ext"],
+            "tipo_aprox": request.POST["tipo_aprox"],
+            "n_clave": request.POST["n_clave"],
+            "ref_shi": request.POST["ref_shi"],
+        }
 
-    data = json.loads(request.body)
-    contenido = f"""<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-  <Document>
-    <name>{data.get("nombre_ad", "Aeródromo")}</name>
-    <Placemark><description>Archivo generado correctamente</description></Placemark>
-  </Document>
-</kml>"""
+        # Llamamos a tu función principal
+        data_kml, data_txt = main(**datos)
 
-    response = HttpResponse(contenido, content_type="application/vnd.google-earth.kml+xml")
-    response['Content-Disposition'] = 'attachment; filename="archivo.kml"'
-    return response
+        # Según el botón presionado:
+        if "descargar_kml" in request.POST:
+            response = HttpResponse(data_kml, content_type="application/vnd.google-earth.kml+xml")
+            response["Content-Disposition"] = f'attachment; filename="{datos["nombre_ad"]}_{datos["pista"]}.kml"'
+            return response
 
-def generar_txt(request):
-    if request.method != 'POST':
-        return JsonResponse({"error": "Método no permitido"}, status=405)
+        elif "descargar_txt" in request.POST:
+            response = HttpResponse(data_txt, content_type="text/plain")
+            response["Content-Disposition"] = f'attachment; filename="{datos["nombre_ad"]}_informe.txt"'
+            return response
 
-    data = json.loads(request.body)
-    contenido = "\n".join([f"{k}: {v}" for k, v in data.items()])
-    response = HttpResponse(contenido, content_type="text/plain")
-    response['Content-Disposition'] = 'attachment; filename="informe.txt"'
-    return response
+    # Si es GET, renderizar el formulario
+    return render(request, "generar.html")
