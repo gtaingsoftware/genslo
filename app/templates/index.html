@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generar KML y TXT</title>
+</head>
+<body>
+<h1>Generar archivos desde Django</h1>
+
+<form id="form" method="post" action="/api/ejecutar/">
+    {% csrf_token %}
+    <label>Nombre AD: <input name="nombre_ad" required></label><br>
+    <label>Pista: <input name="pista" required></label><br>
+    <label>Ancho pista: <input name="ancho_pista" required></label><br>
+    <label>Lat operador: <input name="lat_op" required></label><br>
+    <label>Lon operador: <input name="lon_op" required></label><br>
+    <label>Elev operador: <input name="elev_op" required></label><br>
+    <label>Lat extremo: <input name="lat_ext" required></label><br>
+    <label>Lon extremo: <input name="lon_ext" required></label><br>
+    <label>Elev extremo: <input name="elev_ext" required></label><br>
+    <label>Tipo aprox: <input name="tipo_aprox" required></label><br>
+    <label>N clave: <input name="n_clave" required></label><br>
+    <label>Ref SHI: <input name="ref_shi" required></label><br>
+
+    <button type="submit">Generar archivos</button>
+</form>
+
+</body>
+</html>
