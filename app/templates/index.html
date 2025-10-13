@@ -2,28 +2,37 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Generar KML y TXT</title>
+  <title>Generar KML / TXT</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; }
+    form { display: grid; gap: 10px; max-width: 400px; }
+    label { display: flex; justify-content: space-between; }
+    input { flex: 1; margin-left: 10px; }
+    button { margin-top: 10px; padding: 8px 12px; cursor: pointer; }
+  </style>
 </head>
 <body>
 <h1>Generar archivos desde Django</h1>
 
-<form id="form" method="post" action="/api/ejecutar/">
+<form method="post" action="/api/ejecutar/">
     {% csrf_token %}
-    <label>Nombre AD: <input name="nombre_ad" required></label><br>
-    <label>Pista: <input name="pista" required></label><br>
-    <label>Ancho pista: <input name="ancho_pista" required></label><br>
-    <label>Lat operador: <input name="lat_op" required></label><br>
-    <label>Lon operador: <input name="lon_op" required></label><br>
-    <label>Elev operador: <input name="elev_op" required></label><br>
-    <label>Lat extremo: <input name="lat_ext" required></label><br>
-    <label>Lon extremo: <input name="lon_ext" required></label><br>
-    <label>Elev extremo: <input name="elev_ext" required></label><br>
-    <label>Tipo aprox: <input name="tipo_aprox" required></label><br>
-    <label>N clave: <input name="n_clave" required></label><br>
-    <label>Ref SHI: <input name="ref_shi" required></label><br>
+    <label>Nombre AD: <input name="nombre_ad" required></label>
+    <label>Pista: <input name="pista" required></label>
+    <label>Ancho pista: <input name="ancho_pista" required></label>
+    <label>Latitud operador: <input name="lat_op_dms" required></label>
+    <label>Longitud operador: <input name="long_op_dms" required></label>
+    <label>Elevación operador: <input name="elev_op" required></label>
+    <label>Latitud extremo: <input name="lat_ext_dms" required></label>
+    <label>Longitud extremo: <input name="long_ext_dms" required></label>
+    <label>Elevación extremo: <input name="elev_ext" required></label>
+    <label>Tipo aproximación: <input name="tipo_aprox" required></label>
+    <label>Nº clave: <input name="n_clave" required></label>
+    <label>Ref SHI: <input name="ref_shi" required></label>
 
-    <button type="submit">Generar archivos</button>
+    <button type="submit" name="descargar_kml">Descargar archivo KML</button>
+    <button type="submit" name="descargar_txt">Descargar informe TXT</button>
 </form>
 
 </body>
 </html>
+

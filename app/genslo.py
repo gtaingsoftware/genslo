@@ -1817,77 +1817,61 @@ def dms_to_decimal(dms):
     except Exception:
         return " "
 
-def main():
-    print("\n=== GENSLO beta v1.0 ===")
-    print("Superficies Limitadoras de Obstáculos - Según ANEXO 14 - OACI")
-    print("Grupo de Transporte Aéreo (GTA) - UNLP\n")
-    print("⚠️ AVISO DE SEGURIDAD: Esta herramienta es para uso de planificación, no de proyecto.\n")
+# Carpeta donde se guardarán los archivos generados
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "salidas")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    nombre_ad = input("Nombre de Aeródromo: ")
-    pista = input("Pista Seleccionada (ej. 19): ")
-    ancho_pista = input("Ancho de Pista [m]: ")
+def main(
+    nombre_ad, pista, ancho_pista,
+    lat_op_dms, long_op_dms, elev_op,
+    lat_ext_dms, long_ext_dms, elev_ext,
+    tipo_aprox, n_clave, ref_shi
+):
+    """
+    Función principal para generar archivos KML y TXT.
+    Retorna el contenido KML (data) y el informe TXT.
+    """
 
-    print("\n--- Coordenadas del Umbral de Pista ---")
-    lat_op_dms = input("Latitud (DMS o decimal): ")
-    long_op_dms = input("Longitud (DMS o decimal): ")
-    elev_op = input("Elevación [m]: ")
-
-    print("\n--- Coordenadas del Extremo de Pista ---")
-    lat_ext_dms = input("Latitud (DMS o decimal): ")
-    long_ext_dms = input("Longitud (DMS o decimal): ")
-    elev_ext = input("Elevación [m]: ")
-
+    # Convertir coordenadas a decimal
     lat_op_dec = dms_to_decimal(lat_op_dms)
     long_op_dec = dms_to_decimal(long_op_dms)
     lat_ext_dec = dms_to_decimal(lat_ext_dms)
     long_ext_dec = dms_to_decimal(long_ext_dms)
 
-    print("\n--- Datos Operativos ---")
-    tipo_aprox = input("Tipo de Aproximación [Visual / No Precision / Precision CAT I / Precision CAT II o III]: ")
-    n_clave = input("N° de Clave de Referencia (1-4): ")
-    ref_shi = input("Elevación de Referencia SHI [RWY - THR / Punto Medio / RWY - Extremo]: ")
+    # Generar contenido KML usando tu función crear_genslo
+    contenido = crear_genslo(
+        nombre_ad, pista, long_op_dec, lat_op_dec, elev_op,
+        long_ext_dec, lat_ext_dec, elev_ext, ancho_pista,
+        tipo_aprox, n_clave, ref_shi
+    )
 
-    print("\nGenerando archivos...")
+    # Asumimos que `documentoFinalKml` contiene el KML final generado por `crear_genslo`
+    data = documentoFinalKml
 
-    # Crear .kml
-    kml_content = crear_genslo(nombre_ad, pista, long_op_dec, lat_op_dec, elev_op,
-                               long_ext_dec, lat_ext_dec, elev_ext, ancho_pista,
-                               tipo_aprox, n_clave, ref_shi)
-    kml_filename = f"{nombre_ad}_{pista}.kml"
-    with open(kml_filename, "w", encoding="utf-8") as f:
-        f.write(kml_content)
-
-    # Crear informe .txt
-    informe = f"""
+    # Generar informe TXT
+    txt_content = f"""
 **************************************************************
 *                        INFORME                             *
 **************************************************************
-  Tipo de Aproximación: {tipo_aprox}
-  -----------------------------------------------------------
-  Aeropuerto: {nombre_ad}
-  Pista: {pista}
-  -----------------------------------------------------------
-  Aproximación:
-      Latitud:   {lat_op_dec}°
-      Longitud:  {long_op_dec}°
-      Elevación: {elev_op} m
-  -----------------------------------------------------------
-  Extremo:
-      Latitud:   {lat_ext_dec}°
-      Longitud:  {long_ext_dec}°
-      Elevación: {elev_ext} m
-  -----------------------------------------------------------
-  Ancho de Pista: {ancho_pista} m
-  N° Clave: {n_clave}
-  Ref. SHI: {ref_shi}
+Tipo de Aproximación: {tipo_aprox}
+-----------------------------------------------------------
+Aeropuerto: {nombre_ad}
+Pista: {pista}
+-----------------------------------------------------------
+Aproximación:
+    Latitud:   {lat_op_dec}°
+    Longitud:  {long_op_dec}°
+    Elevación: {elev_op} m
+-----------------------------------------------------------
+Extremo:
+    Latitud:   {lat_ext_dec}°
+    Longitud:  {long_ext_dec}°
+    Elevación: {elev_ext} m
+-----------------------------------------------------------
+Ancho de Pista: {ancho_pista} m
+N° Clave: {n_clave}
+Ref. SHI: {ref_shi}
 **************************************************************
 """
-    txt_filename = f"{nombre_ad}_informe.txt"
-    with open(txt_filename, "w", encoding="utf-8") as f:
-        f.write(informe)
-
-    print(f"\n✅ Archivos generados:\n - {kml_filename}\n - {txt_filename}")
-
-
-if __name__ == "__main__":
-    main()
+    # ✅ En lugar de escribir el archivo, lo devolvemos al controlador Django
+    return data, txt_content

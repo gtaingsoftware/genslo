@@ -1,36 +1,39 @@
-from django.http import FileResponse, HttpResponse
-from app.genslo import main as main_func
-import mimetypes
-import os
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from app.genslo import main
 
+@csrf_exempt
 def ejecutar_programa(request):
     if request.method == "POST":
-        data = request.POST
-        kml_path, txt_path = main_func(
-            nombre_ad=data.get("nombre_ad"),
-            pista=data.get("pista"),
-            ancho_pista=data.get("ancho_pista"),
-            lat_op=data.get("lat_op"),
-            lon_op=data.get("lon_op"),
-            elev_op=data.get("elev_op"),
-            lat_ext=data.get("lat_ext"),
-            lon_ext=data.get("lon_ext"),
-            elev_ext=data.get("elev_ext"),
-            tipo_aprox=data.get("tipo_aprox"),
-            n_clave=data.get("n_clave"),
-            ref_shi=data.get("ref_shi")
-        )
+        datos = {
+            "nombre_ad": request.POST["nombre_ad"],
+            "pista": request.POST["pista"],
+            "ancho_pista": request.POST["ancho_pista"],
+            "lat_op_dms": request.POST["lat_op_dms"],
+            "long_op_dms": request.POST["long_op_dms"],
+            "elev_op": request.POST["elev_op"],
+            "lat_ext_dms": request.POST["lat_ext_dms"],
+            "long_ext_dms": request.POST["long_ext_dms"],
+            "elev_ext": request.POST["elev_ext"],
+            "tipo_aprox": request.POST["tipo_aprox"],
+            "n_clave": request.POST["n_clave"],
+            "ref_shi": request.POST["ref_shi"],
+        }
 
-        # Comprimir los archivos en un ZIP para descargar
-        import zipfile
-        zip_path = os.path.join(os.path.dirname(kml_path), f"{data.get('nombre_ad')}_archivos.zip")
-        with zipfile.ZipFile(zip_path, 'w') as zipf:
-            zipf.write(kml_path, os.path.basename(kml_path))
-            zipf.write(txt_path, os.path.basename(txt_path))
+        # Llamamos a tu función principal
+        data_kml, data_txt = main(**datos)
 
-        # Devolver el ZIP al navegador
-        response = FileResponse(open(zip_path, 'rb'))
-        response['Content-Disposition'] = f'attachment; filename="{data.get("nombre_ad")}_archivos.zip"'
-        return response
-    else:
-        return HttpResponse("Método no permitido", status=405)
+        # Según el botón presionado:
+        if "descargar_kml" in request.POST:
+            response = HttpResponse(data_kml, content_type="application/vnd.google-earth.kml+xml")
+            response["Content-Disposition"] = f'attachment; filename="{datos["nombre_ad"]}_{datos["pista"]}.kml"'
+            return response
+
+        elif "descargar_txt" in request.POST:
+            response = HttpResponse(data_txt, content_type="text/plain")
+            response["Content-Disposition"] = f'attachment; filename="{datos["nombre_ad"]}_informe.txt"'
+            return response
+
+    # Si es GET, renderizar el formulario
+    return render(request, "generar.html")
